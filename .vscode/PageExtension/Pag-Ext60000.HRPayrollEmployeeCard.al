@@ -55,6 +55,21 @@ pageextension 60000 "HR Payroll Employee Card" extends "Employee Card"
             {
                 ApplicationArea = All;
             }
+            field("Salary Slip Email Status"; Rec."Salary Slip Email Status")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
+            field("Salary Slip Status Date"; Rec."Salary Slip Status Date")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
+            field("Salary Slip Status Message"; Rec."Salary Slip Status Message")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
 
             field("PF Account No."; Rec."PF Account No.")
             {
@@ -131,6 +146,32 @@ pageextension 60000 "HR Payroll Employee Card" extends "Employee Card"
                 begin
                     EmployeeRec.Get(Rec."No.");
                     Report.RunModal(Report::"Salary Slip", true, false, EmployeeRec);
+                end;
+            }
+        }
+        addbefore(Email)
+        {
+            action(SendSalarySlipReport)
+            {
+                ApplicationArea = All;
+                Caption = 'Send Salary Slip';
+                PromotedCategory = Process;
+                Promoted = true;
+                PromotedIsBig = true;
+                Image = Email;
+
+                trigger OnAction()
+                var
+                    RequestPageParameters: Text;
+                    PayslipEmailManagement: Codeunit "Payslip Email Management";
+                begin
+                    RequestPageParameters := Report.RunRequestPage(Report::"Salary Slip");
+                    Message('Salary Slip Send');
+                    if RequestPageParameters = '' then
+                        exit;
+
+                    PayslipEmailManagement.SendSalarySlipReportToEmployee(Rec, RequestPageParameters);
+                    CurrPage.Update(false);
                 end;
             }
         }

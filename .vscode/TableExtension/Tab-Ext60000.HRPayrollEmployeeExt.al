@@ -132,6 +132,25 @@ tableextension 60000 "HR Payroll Employee Ext" extends Employee
         {
             DataClassification = ToBeClassified;
         }
+        field(50120; "Salary Slip Email Status"; Option)
+        {
+            Caption = 'Salary Slip Email Status';
+            OptionMembers = Pending,Sent,Error;
+            OptionCaption = 'Pending,Sent,Error';
+            DataClassification = CustomerContent;
+        }
+        field(50121; "Salary Slip Status Date"; DateTime)
+        {
+            Caption = 'Salary Slip Status Date';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
+        field(50122; "Salary Slip Status Message"; Text[250])
+        {
+            Caption = 'Salary Slip Status Message';
+            DataClassification = CustomerContent;
+            Editable = false;
+        }
     }
 
     var
