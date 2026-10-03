@@ -15,7 +15,7 @@ codeunit 60003 "Send All Payslip JobQueue"
         JobQueueEntry: Record "Job Queue Entry";
         LastDay: Date;
     begin
-        // Check if job queue entry already exists
+
         JobQueueEntry.Reset();
         JobQueueEntry.SetRange("Object Type to Run", JobQueueEntry."Object Type to Run"::Codeunit);
         JobQueueEntry.SetRange("Object ID to Run", 60003);
