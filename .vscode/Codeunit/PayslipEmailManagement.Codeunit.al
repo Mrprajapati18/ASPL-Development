@@ -70,7 +70,7 @@ codeunit 60000 "Payslip Email Management"
             exit;
         end;
 
-        if TrySendSalarySlipReport(EmployeeRec, HRMail, RecipientEmail, RequestPageParameters) then
+        if TrySendSalarySlipReport(EmployeeRec, HRMail, RecipientEmail, RequestPageParameters, CalcDate('<CM>', Today)) then
             UpdateSalarySlipStatus(EmployeeRec, EmployeeRec."Salary Slip Email Status"::Sent, StrSubstNo('Salary slip for %1 emailed successfully.', SalaryMonthText))
         else begin
             LastError := GetLastErrorText();
@@ -79,8 +79,40 @@ codeunit 60000 "Payslip Email Management"
         end;
     end;
 
+    procedure SendMonthlySalarySlipReportToEmployee(EmployeeRec: Record Employee; SalaryMonth: Date)
+    var
+        LastError: Text;
+        RecipientEmail: Text[80];
+        HRMail: Text[80];
+        SalaryMonthText: Text[50];
+    begin
+        HRMail := 'hr@atisunya.co';
+        SalaryMonthText := Format(SalaryMonth, 0, '<Month Text> <Year4>');
+        EmployeeRec.Get(EmployeeRec."No.");
+        EmployeeRec."Salary Slip Email Status" := EmployeeRec."Salary Slip Email Status"::Pending;
+        EmployeeRec."Salary Slip Status Date" := CurrentDateTime;
+        EmployeeRec."Salary Slip Status Message" := 'Salary slip email is being processed.';
+        EmployeeRec.Modify(true);
+
+        RecipientEmail := EmployeeRec."Company E-Mail";
+        if RecipientEmail = '' then
+            RecipientEmail := EmployeeRec."E-Mail";
+
+        if RecipientEmail = '' then begin
+            UpdateSalarySlipStatus(EmployeeRec, EmployeeRec."Salary Slip Email Status"::Error, 'Both Company E-Mail and E-Mail are blank.');
+            exit;
+        end;
+
+        if TrySendSalarySlipReport(EmployeeRec, HRMail, RecipientEmail, '', SalaryMonth) then
+            UpdateSalarySlipStatus(EmployeeRec, EmployeeRec."Salary Slip Email Status"::Sent, StrSubstNo('Salary slip for %1 emailed successfully.', SalaryMonthText))
+        else begin
+            LastError := GetLastErrorText();
+            UpdateSalarySlipStatus(EmployeeRec, EmployeeRec."Salary Slip Email Status"::Error, CopyStr(LastError, 1, 250));
+        end;
+    end;
+
     [TryFunction]
-    local procedure TrySendSalarySlipReport(EmployeeRec: Record Employee; HRMail: Text[80]; RecipientEmail: Text[80]; RequestPageParameters: Text)
+    local procedure TrySendSalarySlipReport(EmployeeRec: Record Employee; HRMail: Text[80]; RecipientEmail: Text[80]; RequestPageParameters: Text; SalaryMonth: Date)
     var
         Email: Codeunit Email;
         EmailAccount: Codeunit "Email Account";
@@ -95,8 +127,8 @@ codeunit 60000 "Payslip Email Management"
             Error('No email account is configured in Business Central. Configure an account in Email Accounts before sending payslips.');
 
         EmailMessage.Create(
-            HRMail,
-            StrSubstNo('Salary Slip for %1 - %2', Format(CalcDate('<CM>', Today), 0, '<Month Text> <Year4>'), EmployeeRec.FullName()),
+            RecipientEmail,
+            StrSubstNo('Salary Slip for %1 - %2', Format(SalaryMonth, 0, '<Month Text> <Year4>'), EmployeeRec.FullName()),
             StrSubstNo(
                 '<div style="font-family:Segoe UI,Arial,sans-serif;color:#242424;line-height:1.6;max-width:600px;margin:0 auto;padding:24px;">' +
                 '<p>Dear %1,</p>' +
@@ -107,10 +139,10 @@ codeunit 60000 "Payslip Email Management"
                 '<p>Regards,<br><strong>HR Department</strong></p>' +
                 '</div>',
                 EmployeeRec.FullName(),
-                Format(CalcDate('<CM>', Today), 0, '<Month Text> <Year4>'),
+                Format(SalaryMonth, 0, '<Month Text> <Year4>'),
                 HRMail),
             true);
-        EmailMessage.AddRecipient(Enum::"Email Recipient Type"::Cc, RecipientEmail);
+        EmailMessage.AddRecipient(Enum::"Email Recipient Type"::Cc, HRMail);
 
         TempBlob.CreateOutStream(OutStr);
         RecRef.GetTable(EmployeeRec);

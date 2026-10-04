@@ -209,7 +209,7 @@ report 60000 "Salary Slip"
     trigger OnPreReport()
     begin
         if SalaryMonth = 0D then
-            Error(SalaryMonthRequiredErr);
+            SalaryMonth := CalcDate('<-1M>', Today);
 
         CompanyInformation.Get();
         CompanyInformation.CalcFields(Picture);
@@ -242,8 +242,6 @@ report 60000 "Salary Slip"
         NetSalary: Decimal;
         NetPayInWords: Text[250];
         BasicSalaryInWords: Text[250];
-        SalaryMonthRequiredErr: Label 'Salary Month must be specified.';
-
     local procedure IsLatestSalaryLine(EmployeeSalaryLine: Record "Employee Salary Line"): Boolean
     var
         LatestSalaryLine: Record "Employee Salary Line";

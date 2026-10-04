@@ -4,12 +4,13 @@ codeunit 60001 "Send All Payslips"
     var
         Employee: Record Employee;
         PayslipReport: Codeunit "Payslip Email Management";
+        SalaryMonth: Date;
     begin
+        SalaryMonth := CalcDate('<-1M>', Today);
         Employee.Reset();
         if Employee.FindSet() then
             repeat
-                if (Employee."Company E-Mail" <> '') or (Employee."E-Mail" <> '') then
-                    PayslipReport.SendEmailToEmployee(Employee);
+                PayslipReport.SendMonthlySalarySlipReportToEmployee(Employee, SalaryMonth);
             until Employee.Next() = 0;
     end;
 }
