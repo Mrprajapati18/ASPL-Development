@@ -242,6 +242,7 @@ report 60000 "Salary Slip"
         NetSalary: Decimal;
         NetPayInWords: Text[250];
         BasicSalaryInWords: Text[250];
+
     local procedure IsLatestSalaryLine(EmployeeSalaryLine: Record "Employee Salary Line"): Boolean
     var
         LatestSalaryLine: Record "Employee Salary Line";

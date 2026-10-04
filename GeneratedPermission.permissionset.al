@@ -10,5 +10,9 @@ permissionset 60000 "HR PAYROLL"
         table Employee = X,
         page "Salary Components" = X,
         page "Employee Salary Subform" = X,
-        report "Salary Slip" = X;
+        report "Salary Slip" = X,
+        codeunit "Payslip Email Management" = X,
+        codeunit "Send All Payslip JobQueue" = X,
+        codeunit "Send All Payslips" = X,
+        codeunit "YearlyPayslipEmail Management" = X;
 }
