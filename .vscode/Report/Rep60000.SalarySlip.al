@@ -178,8 +178,8 @@ report 60000 "Salary Slip"
                 BasicSalary := Employee."Basic Salary";
                 TotalEarnings := 0;
                 NetSalary := Round(CalculateNetSalary(Employee), 0.01, '=');
-                NetPayInWords := AmountToWords(NetSalary);
-                BasicSalaryInWords := AmountToWords(BasicSalary);
+                NetPayInWords := AmountInWordsMgt.GetAmountInWords(NetSalary, '');
+                BasicSalaryInWords := AmountInWordsMgt.GetAmountInWords(BasicSalary, '');
                 AttendanceArrearDays := 0;
                 IncrementArrearDays := 0;
             end;
@@ -218,6 +218,7 @@ report 60000 "Salary Slip"
 
     var
         CompanyInformation: Record "Company Information";
+        AmountInWordsMgt: Codeunit "Amount In Ward Mgt";
         SalaryMonth: Date;
         SalaryMonthEnd: Date;
         SalaryMonthText: Text[50];
@@ -343,130 +344,4 @@ report 60000 "Salary Slip"
         end;
     end;
 
-    local procedure AmountToWords(Amount: Decimal): Text[250]
-    var
-        WholeAmount: BigInteger;
-        Paise: Integer;
-        Words: Text[250];
-        IsNegative: Boolean;
-    begin
-        IsNegative := Amount < 0;
-        Amount := Round(Abs(Amount), 0.01, '=');
-        WholeAmount := Amount div 1;
-        Paise := Round((Amount - WholeAmount) * 100, 1, '=');
-        Words := NumberToWords(WholeAmount);
-        if IsNegative then
-            Words := StrSubstNo('Minus %1', Words);
-        if Paise > 0 then
-            Words := StrSubstNo('%1 and %2 Paise', Words, NumberToWords(Paise));
-        exit(StrSubstNo('%1 Only', Words));
-    end;
-
-    local procedure NumberToWords(Number: BigInteger): Text[250]
-    var
-        Words: Text[250];
-        Part: BigInteger;
-    begin
-        if Number = 0 then
-            exit('Zero');
-
-        Part := Number div 10000000;
-        if Part > 0 then begin
-            AppendWords(Words, StrSubstNo('%1 Crore', NumberToWords(Part)));
-            Number := Number mod 10000000;
-        end;
-        Part := Number div 100000;
-        if Part > 0 then begin
-            AppendWords(Words, StrSubstNo('%1 Lakh', NumberToWords(Part)));
-            Number := Number mod 100000;
-        end;
-        Part := Number div 1000;
-        if Part > 0 then begin
-            AppendWords(Words, StrSubstNo('%1 Thousand', NumberToWords(Part)));
-            Number := Number mod 1000;
-        end;
-        Part := Number div 100;
-        if Part > 0 then begin
-            AppendWords(Words, StrSubstNo('%1 Hundred', NumberToWords(Part)));
-            Number := Number mod 100;
-        end;
-        if Number > 0 then
-            AppendWords(Words, TwoDigitNumberToWords(Number));
-        exit(Words);
-    end;
-
-    local procedure TwoDigitNumberToWords(Number: BigInteger): Text[30]
-    var
-        TensText: Text[15];
-    begin
-        case Number of
-            1:
-                exit('One');
-            2:
-                exit('Two');
-            3:
-                exit('Three');
-            4:
-                exit('Four');
-            5:
-                exit('Five');
-            6:
-                exit('Six');
-            7:
-                exit('Seven');
-            8:
-                exit('Eight');
-            9:
-                exit('Nine');
-            10:
-                exit('Ten');
-            11:
-                exit('Eleven');
-            12:
-                exit('Twelve');
-            13:
-                exit('Thirteen');
-            14:
-                exit('Fourteen');
-            15:
-                exit('Fifteen');
-            16:
-                exit('Sixteen');
-            17:
-                exit('Seventeen');
-            18:
-                exit('Eighteen');
-            19:
-                exit('Nineteen');
-        end;
-
-        case Number div 10 of
-            2:
-                TensText := 'Twenty';
-            3:
-                TensText := 'Thirty';
-            4:
-                TensText := 'Forty';
-            5:
-                TensText := 'Fifty';
-            6:
-                TensText := 'Sixty';
-            7:
-                TensText := 'Seventy';
-            8:
-                TensText := 'Eighty';
-            9:
-                TensText := 'Ninety';
-        end;
-        if Number mod 10 > 0 then
-            exit(StrSubstNo('%1 %2', TensText, TwoDigitNumberToWords(Number mod 10)));
-        exit(TensText);
-    end;
-
-    local procedure AppendWords(var Words: Text[250]; AdditionalWords: Text[250])
-    begin
-        if Words <> '' then
-            Words += ' ';
-        Words += AdditionalWords;
-    end;
 }
