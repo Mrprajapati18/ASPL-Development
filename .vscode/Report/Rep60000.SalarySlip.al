@@ -11,7 +11,7 @@ report 60000 "Salary Slip"
         dataitem(Employee; Employee)
         {
             DataItemTableView = sorting("No.");
-            RequestFilterFields = "No.", "EMP ID";
+            RequestFilterFields = "No.";
 
             column(CompName; 'Atisunya Private Limited')
             {
@@ -180,7 +180,6 @@ report 60000 "Salary Slip"
                 NetSalary := Round(CalculateNetSalary(Employee), 0.01, '=');
                 NetPayInWords := AmountToWords(NetSalary);
                 BasicSalaryInWords := AmountToWords(BasicSalary);
-                // PayDays := Date2DMY(SalaryMonthEnd, 1);
                 AttendanceArrearDays := 0;
                 IncrementArrearDays := 0;
             end;
@@ -210,7 +209,6 @@ report 60000 "Salary Slip"
     begin
         if SalaryMonth = 0D then
             SalaryMonth := CalcDate('<-1M>', Today);
-
         CompanyInformation.Get();
         CompanyInformation.CalcFields(Picture);
         SalaryMonthEnd := CalcDate('<CM>', SalaryMonth);
